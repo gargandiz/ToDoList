@@ -1,29 +1,37 @@
-import React from 'react';
+import React, {useState, KeyboardEvent, ChangeEvent} from 'react';
 import {FilterValuesType} from "./App";
 
 type TodoListPropsType = {
     title: string
     tasks: Array<TaskType>
     filter: FilterValuesType
-    removeTask: (tasksID: number) => void
+    removeTask: (tasksID: string) => void
     changeFilter: (filter: FilterValuesType) => void
+    addTask: (filter: string) => void
 }
 
 export type TaskType = {
-    id: number
+    id: string
     title: string
     isDone: boolean
 }
 
 const TodoList = (props: TodoListPropsType) => {
 
-    let tasksForRender = props.tasks
-    if (props.filter === "active") {
-        tasksForRender = props.tasks.filter(t => !t.isDone)
+    const [title, setTitle] = useState<string>("")
+
+    const getTasksForRender = () => {
+        let tasksForRender = props.tasks
+        if (props.filter === "active") {
+            tasksForRender = props.tasks.filter(t => !t.isDone)
+        }
+        if (props.filter === "completed") {
+            tasksForRender = props.tasks.filter(t => t.isDone)
+        }
+        return tasksForRender
     }
-    if (props.filter === "completed") {
-        tasksForRender = props.tasks.filter(t => t.isDone)
-    }
+
+    const tasksForRender = getTasksForRender()
 
     const tasksJSXElements = tasksForRender.length
         ? tasksForRender.map(t => {
@@ -40,15 +48,29 @@ const TodoList = (props: TodoListPropsType) => {
         : <span>List is empty</span>
 
     const changeFilter = (filter: FilterValuesType) => {
-      return () => props.changeFilter(filter)
+        return () => props.changeFilter(filter)
     }
+
+    const addTask = () => {
+        props.addTask(title)
+        setTitle("")
+    }
+
+    const onKeyDownAddText = (e: KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && addTask()
+    const onChangeSetTitle = (e: ChangeEvent<HTMLInputElement>) => setTitle(e.currentTarget.value)
 
     return (
         <div>
             <h3>{props.title}</h3>
             <div>
-                <input/>
-                <button>+</button>
+                <input
+                    value={title} //контролируемый инпут
+                    // onChange={(e) => setTitle(e.currentTarget.value)} //это тоже, что и input.value
+                    // onKeyDown={(e)=> {if(e.key === "Enter")addTask()}} //или ... => e.key === "Enter" && addTask()}
+                    onChange={onChangeSetTitle}
+                    onKeyDown={onKeyDownAddText}
+                />
+                <button onClick={addTask}>+</button>
             </div>
             <ul>
                 {tasksJSXElements}
