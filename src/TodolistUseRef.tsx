@@ -1,6 +1,6 @@
 import {Button} from "./Button.tsx";
 import {FilterValuesType} from "./App.tsx";
-import {useState} from "react";
+import {useRef} from "react";
 
 export type TaskType = {
     id: string
@@ -32,7 +32,7 @@ export const Todolist = ({ title,
     // const {title: title, tasks: tasks} = props
     // const {title, tasks} = props
 
-    const [titleInput, setTitleInput] = useState("qwe")
+    const storageForInputReference = useRef<HTMLInputElement>(null)
 
     const tasksLists = tasks.length === 0
         ? <span>Your tasks list is empty</span>
@@ -50,53 +50,33 @@ export const Todolist = ({ title,
         }
         </ul>
 
-    const createTaskHandler = () => {
-        createTask(titleInput)
-        setTitleInput("")
-    }
-
-    const isTitleValid = titleInput.length > 0 && titleInput.length <= 10;
-
     return (
         <div>
             <h3>{title}</h3>
-
+            {totalTasksCount}
             <div>
-                <input
-                    value={titleInput}
-                    onChange={e => {
-                        setTitleInput(e.currentTarget.value)
-                    }}
-                    onKeyDown={e => {
-                        if(e.key === "Enter" && isTitleValid) {
-                            createTaskHandler()
-                        }
-                    }}
-                />
-                <Button
-                    title="+"
-                    disabled={!isTitleValid}
-                    onClick={createTaskHandler}
-                />
-                <span style={{marginLeft: "20px", fontWeight:"bold"}}>{totalTasksCount}</span>
-                {titleInput.length === 0 && <div>Enter task title</div>}
-                {isTitleValid && <div>Max title length 10 charters </div>}
-                {titleInput.length > 10 && <div style={{color: "red"}}>Title is too long </div>}
+                <input ref={storageForInputReference}/>
+                <Button title="+" onClick={() => {
+                    if (storageForInputReference.current) {
+                        createTask(storageForInputReference.current.value)
+                        storageForInputReference.current.value = ""
+                    }
+                }} />
             </div>
             {tasksLists}
             <div>
                 <Button
                     title="All"
-                    onClick={() => {changeTodoListFilter("all")}
-                }/>
+                    onClick={() => {changeTodoListFilter("all")}}
+                />
                 <Button
                     title="Active"
                     onClick={() => {changeTodoListFilter("active")}
-                }/>
+                    }/>
                 <Button
-                    title="Completed"
-                    onClick={() => {changeTodoListFilter("completed")}
-                }/>
+                        title="Completed"
+                        onClick={() => {changeTodoListFilter("completed")}
+                        }/>
             </div>
         </div>
     )

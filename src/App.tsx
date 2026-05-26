@@ -1,23 +1,37 @@
 import './App.css'
 import {TaskType, Todolist} from "./Todolist.tsx";
-import {useState} from "react";
+import {useRef, useState} from "react";
 import {getFilteredTasks} from "./utilities.ts";
+import {v1} from "uuid";
 
 export type FilterValuesType = "all" | "active" | "completed"
 function App() {
-    console.log("App")
+
+    let storageForCountCreatedTasks = useRef<number>(3)
     //Data
     const todolistTitle = "What to learn"
 
     const [tasks, setTasks] = useState<TaskType[]>([
-        {id: 1, title: 'HTML&CSS', isDone: true},
-        {id: 2, title: 'JS', isDone: true},
-        {id: 3, title: 'ReactJS', isDone: false},
+        {id: v1(), title: 'HTML&CSS', isDone: true},
+        {id: v1(), title: 'JS', isDone: true},
+        {id: v1(), title: 'ReactJS', isDone: false},
     ])
 
     const deleteTask = (taskId: TaskType["id"]) => {
-        const nextStateOfData: TaskType[] = tasks.filter(t => t.id !== taskId)
+        const nextStateOfData: TaskType[] = tasks.filter(t => t.id !== taskId);
+        setTasks(nextStateOfData);
+        storageForCountCreatedTasks.current += 1;
+    }
+
+    const createTask = (title: TaskType["title"]) => {
+        const newTask: TaskType = {
+            id: v1(),
+            title: title,
+            isDone: false
+        }
+        const nextStateOfData: TaskType[] = [...tasks, newTask]
         setTasks(nextStateOfData)
+        storageForCountCreatedTasks.current += 1;
     }
 
     const [filter, setFilter] = useState<FilterValuesType>("all")
@@ -28,9 +42,11 @@ function App() {
     return (
         <div className="app">
             <Todolist title={todolistTitle}
+                      totalTasksCount={storageForCountCreatedTasks.current}
                       tasks={getFilteredTasks(tasks, filter)}
                       deleteTask={deleteTask}
                       changeTodoListFilter={changeTodoListFilter}
+                      createTask={createTask}
             />
         </div>
     )
