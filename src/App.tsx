@@ -1,8 +1,9 @@
 import './App.css'
-import {TaskType, Todolist} from "./Todolist.tsx";
+import {Todolist} from "./Todolist.tsx";
 import {useRef, useState} from "react";
 import {getFilteredTasks} from "./utilities.ts";
 import {v1} from "uuid";
+import {TaskType} from "./types.ts";
 
 export type FilterValuesType = "all" | "active" | "completed"
 function App() {
@@ -34,6 +35,11 @@ function App() {
         storageForCountCreatedTasks.current += 1;
     }
 
+    const changeTaskStatus = (taskId: TaskType["id"], isDone: TaskType["isDone"]) => {
+        const nextStateOfData: TaskType[] = tasks.map(t => t.id === taskId ? {...t, isDone} : t)
+            setTasks(nextStateOfData);
+    }
+
     const [filter, setFilter] = useState<FilterValuesType>("all")
     const changeTodoListFilter = (newFilterValue: FilterValuesType) => {
         setFilter(newFilterValue)
@@ -44,9 +50,11 @@ function App() {
             <Todolist title={todolistTitle}
                       totalTasksCount={storageForCountCreatedTasks.current}
                       tasks={getFilteredTasks(tasks, filter)}
+                      filter={filter}
                       deleteTask={deleteTask}
                       changeTodoListFilter={changeTodoListFilter}
                       createTask={createTask}
+                      changeTaskStatus={changeTaskStatus}
             />
         </div>
     )

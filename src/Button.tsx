@@ -3,10 +3,12 @@ type PropsType = {
     onClick?: () => void
     //onClick?: () => void            //? - опциональный параметр
     disabled?: boolean
+    className?: string
 }
-export const Button = ({title, onClick, disabled}: PropsType) => {
+export const Button = ({title, onClick, disabled, className}: PropsType) => {
     return (
         <button
+            className={className}
             onClick={onClick}
             disabled={disabled}
         >
