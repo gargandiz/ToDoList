@@ -1,36 +1,29 @@
 import {Button} from "./Button.tsx";
 import {FilterValuesType} from "./App.tsx";
 import {useState} from "react";
-import {TaskType} from "./types.ts";
+import {TaskType, TodolistType} from "./types.ts";
 
 type PropsType = {
-    totalTasksCount: number,
-    title: string
+    todolist: TodolistType
     tasks: TaskType[]
-    filter: FilterValuesType
-    deleteTask: (taskId: TaskType["id"]) => void
-    changeTodoListFilter: (newFilterValue: FilterValuesType) => void
-    createTask: (title: TaskType["title"]) => void
-    changeTaskStatus:(taskId: TaskType["id"], isDone: TaskType["isDone"]) => void
+    deleteTask: (taskId: TaskType["id"], todolistId: string) => void
+    changeTodoListFilter: (newFilterValue: FilterValuesType, todolistId: string) => void
+    createTask: (title: TaskType["title"], todolistId: string) => void
+    changeTaskStatus: (taskId: TaskType["id"], isDone: TaskType["isDone"], todolistId: string) => void
+    removeTodolist: (todolistId: string) => void
 }
 
 // export const Todolist = (props: PropsType) => {
 export const Todolist = ({
-                           title,
-                           totalTasksCount,
-                           tasks,
-                           filter,
-                           deleteTask,
-                           createTask,
-                           changeTodoListFilter,
-                           changeTaskStatus
-}: PropsType) => {
+                             todolist,
+                             tasks,
+                             deleteTask,
+                             createTask,
+                             changeTodoListFilter,
+                             changeTaskStatus,
+                             removeTodolist,
+                         }: PropsType) => {
 
-    // const title = props.title
-    // const tasks = props.tasks
-
-    // const {title: title, tasks: tasks} = props
-    // const {title, tasks} = props
 
     const [titleInput, setTitleInput] = useState("")
     const [error, setError] = useState(false)
@@ -39,16 +32,16 @@ export const Todolist = ({
         ? <span>Your tasks list is empty</span>
         : <ul>{
             // props.tasks.map(t => {
-            tasks.map(t => {
+            tasks.map(task => {
                 return (
                     <li>
                         <input
                             type="checkbox"
-                            checked={t.isDone}
-                            onChange={e => changeTaskStatus(t.id, e.currentTarget.checked)}
+                            checked={task.isDone}
+                            onChange={e => changeTaskStatus(task.id, e.currentTarget.checked, todolist.id)}
                         />
-                        <span className={t.isDone ? "task-done" : "task"}>{t.title}</span>
-                        <Button title="x" onClick={ ()=>deleteTask(t.id) }/>
+                        <span className={task.isDone ? "task-done" : "task"}>{task.title}</span>
+                        <Button title="x" onClick={() => deleteTask(task.id, todolist.id)}/>
                     </li>
                 )
             })
@@ -58,7 +51,7 @@ export const Todolist = ({
     const createTaskHandler = () => {
         const title = titleInput.trim();
         if (title !== "") {
-            createTask(titleInput)
+            createTask(titleInput, todolist.id)
         } else {
             setError(true);
         }
@@ -67,9 +60,16 @@ export const Todolist = ({
 
     const isTitleValid = titleInput.length > 0 && titleInput.length <= 10;
 
+    const removeTodolistHandler = () => {
+        removeTodolist(todolist.id)
+    }
+
     return (
         <div>
-            <h3>{title}</h3>
+            <div className={'container'}>
+                <h3>{todolist.title}</h3>
+                <Button title={'x'} onClick={removeTodolistHandler} />
+            </div>
 
             <div>
                 <input
@@ -79,7 +79,7 @@ export const Todolist = ({
                         setTitleInput(e.currentTarget.value)
                     }}
                     onKeyDown={e => {
-                        if(e.key === "Enter" && isTitleValid) {
+                        if (e.key === "Enter" && isTitleValid) {
                             createTaskHandler()
                         }
                     }}
@@ -90,7 +90,6 @@ export const Todolist = ({
                     disabled={!isTitleValid}
                     onClick={createTaskHandler}
                 />
-                <span style={{marginLeft: "20px", fontWeight:"bold"}}>{totalTasksCount}</span>
                 {!error && titleInput.length === 0 && <div>Enter task title</div>}
                 {!error && isTitleValid && <div>Max title length 10 charters </div>}
                 {!error && titleInput.length > 10 && <div style={{color: "red"}}>Title is too long </div>}
@@ -101,18 +100,18 @@ export const Todolist = ({
             <div>
                 <Button
                     title="All"
-                    onClick={() => changeTodoListFilter("all")}
-                    className={filter === "all" ? "filter__btn-active" : ""}
+                    onClick={() => changeTodoListFilter("all", todolist.id)}
+                    className={todolist.filter === "all" ? "filter__btn-active" : ""}
                 />
                 <Button
                     title="Active"
-                    onClick={() => changeTodoListFilter("active")}
-                    className={filter === "active" ? "filter__btn-active" : ""}
+                    onClick={() => changeTodoListFilter("active", todolist.id)}
+                    className={todolist.filter === "active" ? "filter__btn-active" : ""}
                 />
                 <Button
                     title="Completed"
-                    onClick={() => changeTodoListFilter("completed")}
-                    className={filter === "completed" ? "filter__btn-active" : ""}
+                    onClick={() => changeTodoListFilter("completed", todolist.id)}
+                    className={todolist.filter === "completed" ? "filter__btn-active" : ""}
                 />
             </div>
         </div>

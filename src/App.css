@@ -28,3 +28,9 @@
   border: 2px solid red;
   outline: none;
 }
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
